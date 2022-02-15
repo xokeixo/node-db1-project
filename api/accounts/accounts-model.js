@@ -5,23 +5,41 @@ const getAll = () => {
 }
 
 const getById = id => {
-  return db('accounts').where('id', id).first();
+  return db('accounts').where({ id: id });
 }
 
 const create = account => {
-  const [ id ] = db('accounts').insert(account);
-  return getById(id);
+  return db('accounts').insert(account)
+    .then(idArr => {
+      return {
+        id: idArr[0],
+        name: account.name,
+        budget: account.budget
+      };
+    })
+    .catch(() => {
+      return null;
+    })
 }
 
-const updateById = async({id, account}) => {
-  await db('accounts').where('id', id).update({id, account});
-  return getById(id);
+const updateById = (id, account) => {
+  return db('accounts').where({ id: id }).update(account)
+    .then(() => {
+      return {
+        id,
+        name: account.name,
+        budget: account.budget
+      };
+    })
+    .catch(() => {
+      return null;
+    })
 }
 
-const deleteById = async (id) => {
-  const deletedPost = await getById(id);
-  await db('accounts').where('id', id).delete();
-  return deletedPost;
+const deleteById = async(id) => {
+  let account = await getById(id);
+  await db('accounts').where({ id: id }).del();
+  return account;
 }
 
 module.exports = {

@@ -35,12 +35,14 @@ router.post('/', checkAccountPayload, checkAccountNameUnique,  (req, res, next) 
 })
 
 router.put('/:id', checkAccountId, checkAccountPayload, checkAccountNameUnique, async (req, res, next) => {
-  const updatedAccount = await AccountsModel.updateById(req.params.id, req.body).trim();
-  try {
-    res.json(updatedAccount);
-  } catch(err) {
-    next(err)
-  }
+  const { id } = req.params;
+  AccountsModel.updateById(id, req.account)
+    .then(account => {
+      res.status(200).json(account);
+    })
+    .catch(() => {
+      res.status(500).json({message: 'could not create account'});
+    })
 });
 
 router.delete('/:id', checkAccountId, (req, res, next) => {
